@@ -8,7 +8,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from mysql.connector.pooling import MySQLConnectionPool
 
-from src.rowantree.auth.service.contracts.dto.user_in_db import UserInDB
+from ..contracts.dto.user_in_db import UserInDB
 
 
 class DBDAO:

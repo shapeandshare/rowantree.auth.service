@@ -15,8 +15,6 @@ class ServerConfig(BaseModel):
     ----------
     log_dir: Optional[str]
         The log directory.
-    access_key: Optional[str]
-        The API access key.
     database_server: Optional[str]
         The database server hostname
     database_name: Optional[str]
