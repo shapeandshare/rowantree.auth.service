@@ -8,6 +8,8 @@ import mysql.connector
 from mysql.connector import errorcode
 from mysql.connector.pooling import MySQLConnectionPool
 
+from src.rowantree.auth.service.contracts.dto.user_in_db import UserInDB
+
 
 class DBDAO:
     """
@@ -72,3 +74,20 @@ class DBDAO:
             logging.debug("[DAO] [Stored Proc Call Details] Returning:")
             logging.debug(rows)
         return rows
+
+    fake_users_db: dict = {
+        "johndoe": {
+            "guid": "a04ede08-f10c-4cd9-80a8-137d7081cf12",
+            "username": "johndoe",
+            "full_name": "John Doe",
+            "email": "johndoe@example.com",
+            "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+            "disabled": False,
+            "admin": True,
+        }
+    }
+
+    def get_user_from_db(self, username: str) -> Optional[UserInDB]:
+        if username in self.fake_users_db:
+            user_dict = self.fake_users_db[username]
+            return UserInDB.parse_obj(user_dict)

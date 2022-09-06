@@ -1,14 +1,12 @@
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
-from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from starlette import status
 from starlette.exceptions import HTTPException
 
 from ..contracts.dto.token_data import TokenData
-from ..contracts.dto.user import User
 from ..contracts.dto.user_in_db import UserInDB
 from .abstract_service import AbstractService
 
@@ -22,31 +20,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 class AuthService(AbstractService):
     pwd_context: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    fake_users_db: dict = {
-        "johndoe": {
-            "guid": "a04ede08-f10c-4cd9-80a8-137d7081cf12",
-            "username": "johndoe",
-            "full_name": "John Doe",
-            "email": "johndoe@example.com",
-            "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-            "disabled": False,
-            "admin": True,
-        }
-    }
-
     def verify_password(self, plain_password, hashed_password) -> bool:
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password) -> str:
         return self.pwd_context.hash(password)
 
-    def get_user_from_db(self, username: str) -> Optional[UserInDB]:
-        if username in self.fake_users_db:
-            user_dict = self.fake_users_db[username]
-            return UserInDB.parse_obj(user_dict)
-
     def authenticate_user(self, username: str, password: str) -> Optional[UserInDB]:
-        user: Optional[UserInDB] = self.get_user_from_db(username)
+        user: Optional[UserInDB] = self.dao.get_user_from_db(username)
         if not user:
             return None
         if not self.verify_password(password, user.hashed_password):
@@ -78,7 +59,7 @@ class AuthService(AbstractService):
             token_data: TokenData = TokenData(username=username)
         except JWTError:
             raise credentials_exception
-        user: Optional[UserInDB] = self.get_user_from_db(username=token_data.username)
+        user: Optional[UserInDB] = self.dao.get_user_from_db(username=token_data.username)
         if user is None:
             raise credentials_exception
         return user
