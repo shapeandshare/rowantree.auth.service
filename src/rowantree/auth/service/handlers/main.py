@@ -38,7 +38,7 @@ logging.debug(config.json(by_alias=True, exclude_unset=True))
 # Creating database connection pool, and DAO
 cnxpool: MySQLConnectionPool = get_connect_pool(config=config)
 dao: DBDAO = DBDAO(cnxpool=cnxpool)
-auth_service: AuthService = AuthService(dao=dao)
+auth_service: AuthService = AuthService(dao=dao, config=config)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

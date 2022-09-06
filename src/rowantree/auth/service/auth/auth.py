@@ -10,12 +10,6 @@ from ..contracts.dto.token_data import TokenData
 from ..contracts.dto.user_in_db import UserInDB
 from .abstract_service import AbstractService
 
-# to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
 
 class AuthService(AbstractService):
     pwd_context: CryptContext = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -34,16 +28,16 @@ class AuthService(AbstractService):
             return None
         return user
 
-    @staticmethod
-    def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None) -> str:
+    def create_user_access_token(self, user: UserInDB) -> dict:
+        data: dict = {"sub": user.username}
+        return self.create_access_token(data=data)
+
+    def create_access_token(self, data: dict) -> dict:
         to_encode: dict = data.copy()
-        if expires_delta:
-            expire: datetime = datetime.utcnow() + expires_delta
-        else:
-            expire: datetime = datetime.utcnow() + timedelta(minutes=15)
+        expire: datetime = datetime.utcnow() + timedelta(minutes=self.config.expiration_time)
         to_encode.update({"iss": "rowantree.auth.service", "exp": expire})  # TODO: use fully qualified domain name
-        encoded_jwt: str = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-        return encoded_jwt
+        encoded_jwt: str = jwt.encode(to_encode, self.config.secret_key, algorithm=self.config.algorithm)
+        return {"access_token": encoded_jwt, "token_type": "bearer"}
 
     def get_user_from_jwt(self, token: str) -> UserInDB:
         credentials_exception: HTTPException = HTTPException(
@@ -52,7 +46,7 @@ class AuthService(AbstractService):
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-            payload: dict = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            payload: dict = jwt.decode(token, self.config.secret_key, algorithms=[self.config.algorithm])
             username: Optional[str] = payload.get("sub")
             if username is None:
                 raise credentials_exception

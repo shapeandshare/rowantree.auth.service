@@ -1,12 +1,12 @@
 """ Abstract Controller Definition """
 
-from abc import ABC, abstractmethod
-from typing import Any, Optional
+from pydantic import BaseModel
 
+from ..config.server import ServerConfig
 from ..db.dao import DBDAO
 
 
-class AbstractService(ABC):
+class AbstractService(BaseModel):
     """
     Abstract Service
 
@@ -14,9 +14,12 @@ class AbstractService(ABC):
     ----------
     dao: DBDAO
         The database DAO.
+    config: ServerConfig
+        A server config object
     """
 
     dao: DBDAO
+    config: ServerConfig
 
-    def __init__(self, dao: DBDAO):
-        self.dao = dao
+    class Config:
+        arbitrary_types_allowed = True
