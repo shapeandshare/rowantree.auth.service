@@ -87,7 +87,12 @@ class DBDAO:
         }
     }
 
-    def get_user_from_db(self, username: str) -> Optional[UserInDB]:
+    def get_user_from_db_by_username(self, username: str) -> Optional[UserInDB]:
         if username in self.fake_users_db:
             user_dict = self.fake_users_db[username]
             return UserInDB.parse_obj(user_dict)
+
+    def get_user_from_db_by_guid(self, guid: str) -> Optional[UserInDB]:
+        for user in self.fake_users_db.values():
+            if guid == user["guid"]:
+                return UserInDB.parse_obj(user)

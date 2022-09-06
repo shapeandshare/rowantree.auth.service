@@ -44,7 +44,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
-    return auth_service.get_user_from_jwt(token=token)
+    return auth_service.get_user_by_jwt(token=token)
 
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):

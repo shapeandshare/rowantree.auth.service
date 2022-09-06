@@ -21,7 +21,7 @@ class AuthService(AbstractService):
         return self.pwd_context.hash(password)
 
     def authenticate_user(self, username: str, password: str) -> Optional[UserInDB]:
-        user: Optional[UserInDB] = self.dao.get_user_from_db(username)
+        user: Optional[UserInDB] = self.dao.get_user_from_db_by_username(username=username)
         if not user:
             return None
         if not self.verify_password(password, user.hashed_password):
@@ -29,7 +29,7 @@ class AuthService(AbstractService):
         return user
 
     def create_user_access_token(self, user: UserInDB) -> dict:
-        data: dict = {"sub": user.username}
+        data: dict = {"sub": user.guid, "disabled": user.disabled, "admin": user.admin}
         return self.create_access_token(data=data)
 
     def create_access_token(self, data: dict) -> dict:
@@ -39,7 +39,7 @@ class AuthService(AbstractService):
         encoded_jwt: str = jwt.encode(to_encode, self.config.secret_key, algorithm=self.config.algorithm)
         return {"access_token": encoded_jwt, "token_type": "bearer"}
 
-    def get_user_from_jwt(self, token: str) -> UserInDB:
+    def get_user_by_jwt(self, token: str) -> UserInDB:
         credentials_exception: HTTPException = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -47,13 +47,13 @@ class AuthService(AbstractService):
         )
         try:
             payload: dict = jwt.decode(token, self.config.secret_key, algorithms=[self.config.algorithm])
-            username: Optional[str] = payload.get("sub")
-            if username is None:
+            guid: Optional[str] = payload.get("sub")
+            if guid is None:
                 raise credentials_exception
-            token_data: TokenData = TokenData(username=username)
+            token_data: TokenData = TokenData(guid=guid)
         except JWTError:
             raise credentials_exception
-        user: Optional[UserInDB] = self.dao.get_user_from_db(username=token_data.username)
+        user: Optional[UserInDB] = self.dao.get_user_from_db_by_guid(guid=token_data.guid)
         if user is None:
             raise credentials_exception
         return user
