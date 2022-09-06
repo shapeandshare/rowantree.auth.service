@@ -1,5 +1,6 @@
+import logging
 from datetime import datetime, timedelta
-from typing import Optional, Union
+from typing import Optional
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -8,6 +9,7 @@ from starlette.exceptions import HTTPException
 
 from ..contracts.dto.token_data import TokenData
 from ..contracts.dto.user_in_db import UserInDB
+from ..db.incorrect_row_count_error import IncorrectRowCountError
 from .abstract_service import AbstractService
 
 
@@ -21,11 +23,18 @@ class AuthService(AbstractService):
         return self.pwd_context.hash(password)
 
     def authenticate_user(self, username: str, password: str) -> Optional[UserInDB]:
-        user: Optional[UserInDB] = self.dao.get_user_from_db_by_username(username=username)
+        user: Optional[UserInDB] = None
+
+        try:
+            user = self.dao.get_user_from_db_by_username(username=username)
+        except IncorrectRowCountError as error:
+            logging.debug(f"User not found: {str(error)}")
+
         if not user:
             return None
         if not self.verify_password(password, user.hashed_password):
             return None
+
         return user
 
     def create_user_access_token(self, user: UserInDB) -> dict:
@@ -53,7 +62,15 @@ class AuthService(AbstractService):
             token_data: TokenData = TokenData(guid=guid)
         except JWTError:
             raise credentials_exception
-        user: Optional[UserInDB] = self.dao.get_user_from_db_by_guid(guid=token_data.guid)
+
+        user: Optional[UserInDB] = None
+
+        try:
+            user = self.dao.get_user_from_db_by_guid(guid=token_data.guid)
+        except IncorrectRowCountError as error:
+            logging.debug(f"User not found: {str(error)}")
+
         if user is None:
             raise credentials_exception
+
         return user

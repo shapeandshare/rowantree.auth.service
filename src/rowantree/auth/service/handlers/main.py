@@ -13,6 +13,7 @@ from starlette.middleware.cors import CORSMiddleware
 from ..auth.auth import AuthService
 from ..config.server import ServerConfig
 from ..contracts.dto.user import User
+from ..contracts.dto.user_in_db import UserInDB
 from ..controllers.token import TokenController
 from ..controllers.users_me_get import UsersMeGetController
 from ..db.dao import DBDAO
@@ -43,14 +44,20 @@ auth_service: AuthService = AuthService(dao=dao, config=config)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
     return auth_service.get_user_by_jwt(token=token)
 
 
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
+async def get_current_active_user(current_user: UserInDB = Depends(get_current_user)) -> UserInDB:
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+async def is_admin(current_active_user: UserInDB = Depends(get_current_active_user)):
+    if current_active_user.admin is False:
+        raise HTTPException(status_code=401, detail="Insufficient Permissions")
+    return current_active_user
 
 
 # Create controllers

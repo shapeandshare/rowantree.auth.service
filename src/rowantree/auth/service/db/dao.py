@@ -9,6 +9,7 @@ from mysql.connector import errorcode
 from mysql.connector.pooling import MySQLConnectionPool
 
 from ..contracts.dto.user_in_db import UserInDB
+from .incorrect_row_count_error import IncorrectRowCountError
 
 
 class DBDAO:
@@ -75,24 +76,22 @@ class DBDAO:
             logging.debug(rows)
         return rows
 
-    fake_users_db: dict = {
-        "johndoe": {
-            "guid": "a04ede08-f10c-4cd9-80a8-137d7081cf12",
-            "username": "johndoe",
-            "full_name": "John Doe",
-            "email": "johndoe@example.com",
-            "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-            "disabled": False,
-            "admin": True,
-        }
-    }
+    def get_user_from_db_by_username(self, username: str) -> UserInDB:
+        args: list[str] = [username]
+        rows: list[Tuple] = self._call_proc("getUserByUsername", args, True)
+        if len(rows) != 1:
+            raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
+        user: tuple = rows[0]
+        return UserInDB(
+            username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=user[6], admin=user[7]
+        )
 
-    def get_user_from_db_by_username(self, username: str) -> Optional[UserInDB]:
-        if username in self.fake_users_db:
-            user_dict = self.fake_users_db[username]
-            return UserInDB.parse_obj(user_dict)
-
-    def get_user_from_db_by_guid(self, guid: str) -> Optional[UserInDB]:
-        for user in self.fake_users_db.values():
-            if guid == user["guid"]:
-                return UserInDB.parse_obj(user)
+    def get_user_from_db_by_guid(self, guid: str) -> UserInDB:
+        args: list[str] = [guid]
+        rows: list[Tuple] = self._call_proc("getUserByGUID", args)
+        if len(rows) != 1:
+            raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
+        user: tuple = rows[0]
+        return UserInDB(
+            username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=user[6], admin=user[7]
+        )
