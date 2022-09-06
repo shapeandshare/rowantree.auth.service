@@ -1,0 +1,5 @@
+uvicorn[standard]~=0.18
+fastapi~=0.81
+mysql-connector-python~=8.0
+starlette~=0.19
+pydantic~=1.10
