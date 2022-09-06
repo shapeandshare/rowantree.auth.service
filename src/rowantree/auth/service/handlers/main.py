@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from mysql.connector.pooling import MySQLConnectionPool
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
@@ -40,16 +40,11 @@ cnxpool: MySQLConnectionPool = get_connect_pool(config=config)
 dao: DBDAO = DBDAO(cnxpool=cnxpool)
 auth_service: AuthService = AuthService(dao=dao)
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-async def get_current_user(token: str = Depends(auth_service.oauth2_scheme)):
-    user = auth_service.fake_decode_token(token)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return user
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    return auth_service.get_user_from_jwt(token=token)
 
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
@@ -76,6 +71,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Define our handlers
 
 
@@ -96,10 +92,10 @@ async def health_plain() -> bool:
 
 
 @app.post("/token")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def token_handler(form_data: OAuth2PasswordRequestForm = Depends()):
     return token_controller.execute(request=form_data)
 
 
 @app.get("/users/me")
-async def users_me_get(current_user: User = Depends(get_current_active_user)):
+async def users_me_get_handler(current_user: User = Depends(get_current_active_user)) -> User:
     return users_me_get_controller.execute(request=current_user)
