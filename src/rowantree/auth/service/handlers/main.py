@@ -12,6 +12,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from ..auth.auth import AuthService
 from ..config.server import ServerConfig
+from ..contracts.dto.token import Token
 from ..contracts.dto.user import User
 from ..contracts.dto.user_in_db import UserInDB
 from ..controllers.token import TokenController
@@ -99,7 +100,7 @@ async def health_plain() -> bool:
 
 
 @app.post("/token")
-async def token_handler(form_data: OAuth2PasswordRequestForm = Depends()):
+async def token_handler(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
     return token_controller.execute(request=form_data)
 
 

@@ -30,6 +30,7 @@ class ServerConfig(BaseModel):
     secret_key: Optional[str]
     algorithm: Optional[str]  # Should be "HS256"
     expiration_time: Optional[int]  # in minutes
+    issuer: Optional[str]
 
     database_server: Optional[str]
     database_name: Optional[str]
@@ -48,6 +49,7 @@ class ServerConfig(BaseModel):
         self.secret_key = config.get("SERVER", "secret_key")
         self.algorithm = config.get("SERVER", "algorithm")
         self.expiration_time = config.getint("SERVER", "expiration_time")
+        self.issuer = config.get("SERVER", "issuer")
 
         # Database Options
         self.database_server = config.get("DATABASE", "server")
@@ -66,6 +68,9 @@ class ServerConfig(BaseModel):
 
         if "ACCESS_TOKEN_EXPIRATION_TIME" in os.environ:
             self.expiration_time = int(os.environ["ACCESS_TOKEN_EXPIRATION_TIME"])
+
+        if "ISSUER" in os.environ:
+            self.issuer = os.environ["ISSUER"]
 
         if "DATABASE_SERVER" in os.environ:
             self.database_server = os.environ["DATABASE_SERVER"]

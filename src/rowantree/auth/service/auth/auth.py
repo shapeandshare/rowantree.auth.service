@@ -7,6 +7,7 @@ from passlib.context import CryptContext
 from starlette import status
 from starlette.exceptions import HTTPException
 
+from ..contracts.dto.token import Token
 from ..contracts.dto.token_data import TokenData
 from ..contracts.dto.user_in_db import UserInDB
 from ..db.incorrect_row_count_error import IncorrectRowCountError
@@ -37,16 +38,16 @@ class AuthService(AbstractService):
 
         return user
 
-    def create_user_access_token(self, user: UserInDB) -> dict:
+    def create_user_access_token(self, user: UserInDB) -> Token:
         data: dict = {"sub": user.guid, "disabled": user.disabled, "admin": user.admin}
         return self.create_access_token(data=data)
 
-    def create_access_token(self, data: dict) -> dict:
+    def create_access_token(self, data: dict) -> Token:
         to_encode: dict = data.copy()
         expire: datetime = datetime.utcnow() + timedelta(minutes=self.config.expiration_time)
-        to_encode.update({"iss": "rowantree.auth.service", "exp": expire})  # TODO: use fully qualified domain name
+        to_encode.update({"iss": self.config.issuer, "exp": expire})  # TODO: use fully qualified domain name
         encoded_jwt: str = jwt.encode(to_encode, self.config.secret_key, algorithm=self.config.algorithm)
-        return {"access_token": encoded_jwt, "token_type": "bearer"}
+        return Token(access_token=encoded_jwt, token_type="bearer")
 
     def get_user_by_jwt(self, token: str) -> UserInDB:
         credentials_exception: HTTPException = HTTPException(
@@ -55,7 +56,9 @@ class AuthService(AbstractService):
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-            payload: dict = jwt.decode(token, self.config.secret_key, algorithms=[self.config.algorithm])
+            payload: dict = jwt.decode(
+                token, self.config.secret_key, algorithms=[self.config.algorithm], issuer=self.config.issuer
+            )
             guid: Optional[str] = payload.get("sub")
             if guid is None:
                 raise credentials_exception
