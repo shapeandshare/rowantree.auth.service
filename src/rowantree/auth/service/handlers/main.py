@@ -99,11 +99,11 @@ async def health_plain() -> bool:
     return True
 
 
-@app.post("/token")
+@app.post("/v1/auth/token")
 async def token_handler(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
     return token_controller.execute(request=form_data)
 
 
-@app.get("/users/me")
+@app.get("/v1/auth/users/me")
 async def users_me_get_handler(current_user: User = Depends(get_current_active_user)) -> User:
     return users_me_get_controller.execute(request=current_user)

@@ -69,8 +69,8 @@ class ServerConfig(BaseModel):
         if "ACCESS_TOKEN_EXPIRATION_TIME" in os.environ:
             self.expiration_time = int(os.environ["ACCESS_TOKEN_EXPIRATION_TIME"])
 
-        if "ISSUER" in os.environ:
-            self.issuer = os.environ["ISSUER"]
+        if "ACCESS_TOKEN_ISSUER" in os.environ:
+            self.issuer = os.environ["ACCESS_TOKEN_ISSUER"]
 
         if "DATABASE_SERVER" in os.environ:
             self.database_server = os.environ["DATABASE_SERVER"]
