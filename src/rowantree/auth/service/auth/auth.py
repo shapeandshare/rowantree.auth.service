@@ -45,7 +45,7 @@ class AuthService(AbstractService):
     def create_access_token(self, data: dict) -> Token:
         to_encode: dict = data.copy()
         expire: datetime = datetime.utcnow() + timedelta(minutes=self.config.expiration_time)
-        to_encode.update({"iss": self.config.issuer, "exp": expire})  # TODO: use fully qualified domain name
+        to_encode.update({"iss": self.config.issuer, "exp": expire})
         encoded_jwt: str = jwt.encode(to_encode, self.config.secret_key, algorithm=self.config.algorithm)
         return Token(access_token=encoded_jwt, token_type="bearer")
 

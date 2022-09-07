@@ -82,8 +82,17 @@ class DBDAO:
         if len(rows) != 1:
             raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
         user: tuple = rows[0]
+
+        is_disabled: bool = True
+        if user[6] == 0:
+            is_disabled = False
+
+        is_admin: bool = False
+        if user[7] == 1:
+            is_admin = True
+
         return UserInDB(
-            username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=user[6], admin=user[7]
+            username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=is_disabled, admin=is_admin
         )
 
     def get_user_from_db_by_guid(self, guid: str) -> UserInDB:
@@ -92,6 +101,15 @@ class DBDAO:
         if len(rows) != 1:
             raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
         user: tuple = rows[0]
+
+        is_disabled: bool = True
+        if user[6] == 0:
+            is_disabled = False
+
+        is_admin: bool = False
+        if user[7] == 1:
+            is_admin = True
+
         return UserInDB(
-            username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=user[6], admin=user[7]
+            username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=is_disabled, admin=is_admin
         )
