@@ -4,7 +4,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from ..contracts.dto.token import Token
+from rowantree.auth.sdk.contracts.dto.token import Token
+
 from ..contracts.dto.user_in_db import UserInDB
 from .abstract_controller import AbstractController
 

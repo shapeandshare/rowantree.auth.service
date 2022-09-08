@@ -6,18 +6,13 @@ import socket
 from mysql.connector import Error, errorcode
 from mysql.connector.pooling import MySQLConnectionPool
 
-from ..config.server import ServerConfig
+from ..common.environment import demand_env_var
 
 
 # pylint: disable=duplicate-code
-def get_connect_pool(config: ServerConfig) -> MySQLConnectionPool:
+def get_connect_pool() -> MySQLConnectionPool:
     """
     Gets a connection pool to the database.
-
-    Parameters
-    ----------
-    config: ServerConfig
-        The server configuration.
 
     Returns
     -------
@@ -30,10 +25,10 @@ def get_connect_pool(config: ServerConfig) -> MySQLConnectionPool:
         cnxpool: MySQLConnectionPool = MySQLConnectionPool(
             pool_name="servercnxpool",
             pool_size=32,
-            user=config.database_username,
-            password=config.database_password,
-            host=config.database_server,
-            database=config.database_name,
+            user=demand_env_var(name="DATABASE_USERNAME"),
+            password=demand_env_var(name="DATABASE_PASSWORD"),
+            host=demand_env_var(name="DATABASE_SERVER"),
+            database=demand_env_var(name="DATABASE_NAME"),
         )
         return cnxpool
     except socket.error as error:
