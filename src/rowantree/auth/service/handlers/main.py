@@ -57,7 +57,7 @@ app.add_middleware(
 
 
 @app.get("/health/plain", status_code=status.HTTP_200_OK)
-async def health_plain() -> bool:
+def health_plain() -> bool:
     """
     Get Application Health
     [GET] /health/plain
