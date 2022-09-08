@@ -10,8 +10,8 @@ from mysql.connector.pooling import MySQLConnectionPool
 from starlette.middleware.cors import CORSMiddleware
 
 from rowantree.auth.sdk.contracts.dto.token import Token
+from rowantree.common.sdk import demand_env_var
 
-from ..common.environment import demand_env_var
 from ..controllers.token import TokenController
 from ..services.auth import AuthService
 from ..services.db.dao import DBDAO

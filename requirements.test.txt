@@ -7,3 +7,4 @@ isort>=5.10.1
 safety>=1.10.3
 
 coverage>=6.3.2
+python-dotenv~=0.21
