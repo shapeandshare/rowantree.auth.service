@@ -10,7 +10,7 @@ from passlib.context import CryptContext
 from rowantree.auth.sdk.contracts.dto.token import Token
 
 from ..common.environment import demand_env_var, demand_env_var_as_float
-from ..contracts.dto.user_in_db import UserInDB
+from ..contracts.dto.user.user import User
 from ..db.incorrect_row_count_error import IncorrectRowCountError
 from .abstract_service import AbstractService
 
@@ -63,7 +63,7 @@ class AuthService(AbstractService):
 
         return self.pwd_context.hash(password)
 
-    def authenticate_user(self, username: str, password: str) -> Optional[UserInDB]:
+    def authenticate_user(self, username: str, password: str) -> Optional[User]:
         """
         Authenticates a user by username/password.
 
@@ -76,11 +76,11 @@ class AuthService(AbstractService):
 
         Returns
         -------
-        user: Optional[UserInDB]
+        user: Optional[User]
             Returns an instance of `UserInDB` if successfully authenticated, otherwise `None`.
         """
 
-        user: Optional[UserInDB] = None
+        user: Optional[User] = None
 
         try:
             user = self.dao.get_user(username=username)
@@ -94,13 +94,14 @@ class AuthService(AbstractService):
 
         return user
 
-    def create_user_access_token(self, user: UserInDB) -> Token:
+    @staticmethod
+    def create_user_access_token(user: User) -> Token:
         """
         Create bearer Token from user instance.
 
         Parameters
         ----------
-        user: UserInDB
+        user: User
             An instance of a UserInDB object.
 
         Returns
@@ -142,13 +143,13 @@ class AuthService(AbstractService):
         return Token(access_token=encoded_jwt, token_type="bearer")
 
     # TODO: Future functionality.
-    # def get_user_by_jwt(self, token: str) -> UserInDB:
+    # def get_user_by_jwt(self, token: str) -> User:
     #     credentials_exception: HTTPException = HTTPException(
     #         status_code=status.HTTP_401_UNAUTHORIZED,
     #         detail="Could not validate credentials",
     #         headers={"WWW-Authenticate": "Bearer"},
     #     )
-    #     user: Optional[UserInDB] = None
+    #     user: Optional[User] = None
     #     token_claims: TokenClaims = get_claims(token=token)
     #
     #     try:

@@ -6,13 +6,14 @@ from starlette.exceptions import HTTPException
 
 from rowantree.auth.sdk.contracts.dto.token import Token
 
-from ..contracts.dto.user_in_db import UserInDB
+from ..auth.auth import AuthService
+from ..contracts.dto.user.user import User
 from .abstract_controller import AbstractController
 
 
 class TokenController(AbstractController):
     def execute(self, request: OAuth2PasswordRequestForm) -> Token:
-        user: Optional[UserInDB] = self.auth_service.authenticate_user(request.username, request.password)
+        user: Optional[User] = self.auth_service.authenticate_user(request.username, request.password)
 
         if not user:
             raise HTTPException(
@@ -20,4 +21,4 @@ class TokenController(AbstractController):
                 detail="Incorrect username or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return self.auth_service.create_user_access_token(user=user)
+        return AuthService.create_user_access_token(user=user)

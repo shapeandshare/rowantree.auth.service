@@ -10,7 +10,7 @@ from mysql.connector.pooling import MySQLConnectionPool
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from ..contracts.dto.user_in_db import UserInDB
+from ..contracts.dto.user.user import User
 from .incorrect_row_count_error import IncorrectRowCountError
 
 
@@ -78,7 +78,7 @@ class DBDAO:
             logging.debug(rows)
         return rows
 
-    def get_user(self, username: Optional[str] = None, guid: Optional[str] = None) -> UserInDB:
+    def get_user(self, username: Optional[str] = None, guid: Optional[str] = None) -> User:
         if username is None and guid is None:
             logging.debug("get_user called without username or a guid, one is required")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -103,6 +103,6 @@ class DBDAO:
         if user[7] == 1:
             is_admin = True
 
-        return UserInDB(
+        return User(
             username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=is_disabled, admin=is_admin
         )
