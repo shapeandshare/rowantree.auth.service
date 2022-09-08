@@ -42,4 +42,4 @@ jobs:
         sacr run lint
     - name: Run Tests
       run: |
-        npm run test
+        sacr run test
