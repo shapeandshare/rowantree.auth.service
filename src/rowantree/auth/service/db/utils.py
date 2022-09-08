@@ -24,7 +24,7 @@ def get_connect_pool() -> MySQLConnectionPool:
         logging.debug("Connecting to database")
         cnxpool: MySQLConnectionPool = MySQLConnectionPool(
             pool_name="servercnxpool",
-            pool_size=32,
+            pool_size=3,
             user=demand_env_var(name="DATABASE_USERNAME"),
             password=demand_env_var(name="DATABASE_PASSWORD"),
             host=demand_env_var(name="DATABASE_SERVER"),

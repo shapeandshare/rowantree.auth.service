@@ -9,6 +9,7 @@ Deployment
 **Start the service (development only):**
 ```
 uvicorn src.rowantree.auth.service.handlers.main:app --reload --port 8001 --env-file env/.env.offline
+uvicorn rowantree.auth.service.handlers.main:app --reload --port 8001 --env-file env/.env.offline
 ```
 
 **Production Deployment**
