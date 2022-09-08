@@ -40,7 +40,6 @@ jobs:
     - name: Run Linting
       run: |
         sacr run lint
-# TODO: Enable once tests are defined
-#    - name: Run Tests
-#      run: |
-#        npm run test
+    - name: Run Tests
+      run: |
+        npm run test
