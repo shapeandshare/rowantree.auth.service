@@ -8,6 +8,9 @@ import mysql.connector
 from mysql.connector import errorcode
 from mysql.connector.pooling import MySQLConnectionPool
 
+from ..contracts.dto.user_in_db import UserInDB
+from .incorrect_row_count_error import IncorrectRowCountError
+
 
 class DBDAO:
     """
@@ -72,3 +75,41 @@ class DBDAO:
             logging.debug("[DAO] [Stored Proc Call Details] Returning:")
             logging.debug(rows)
         return rows
+
+    def get_user_from_db_by_username(self, username: str) -> UserInDB:
+        args: list[str] = [username]
+        rows: list[Tuple] = self._call_proc("getUserByUsername", args, True)
+        if len(rows) != 1:
+            raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
+        user: tuple = rows[0]
+
+        is_disabled: bool = True
+        if user[6] == 0:
+            is_disabled = False
+
+        is_admin: bool = False
+        if user[7] == 1:
+            is_admin = True
+
+        return UserInDB(
+            username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=is_disabled, admin=is_admin
+        )
+
+    def get_user_from_db_by_guid(self, guid: str) -> UserInDB:
+        args: list[str] = [guid]
+        rows: list[Tuple] = self._call_proc("getUserByGUID", args)
+        if len(rows) != 1:
+            raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
+        user: tuple = rows[0]
+
+        is_disabled: bool = True
+        if user[6] == 0:
+            is_disabled = False
+
+        is_admin: bool = False
+        if user[7] == 1:
+            is_admin = True
+
+        return UserInDB(
+            username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=is_disabled, admin=is_admin
+        )

@@ -15,8 +15,6 @@ class ServerConfig(BaseModel):
     ----------
     log_dir: Optional[str]
         The log directory.
-    access_key: Optional[str]
-        The API access key.
     database_server: Optional[str]
         The database server hostname
     database_name: Optional[str]
@@ -29,15 +27,18 @@ class ServerConfig(BaseModel):
 
     log_dir: Optional[str]
 
-    access_key: Optional[str]
+    secret_key: Optional[str]
+    algorithm: Optional[str]  # Should be "HS256"
+    expiration_time: Optional[int]  # in minutes
+    issuer: Optional[str]
 
     database_server: Optional[str]
     database_name: Optional[str]
     database_username: Optional[str]
     database_password: Optional[str]
 
-    def __init__(self, *args, config_file_path: str = "rowantree.config", **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, config_file_path: str = "rowantree.config", **kwargs):
+        super().__init__(**kwargs)
         config = configparser.ConfigParser()
         config.read(config_file_path)
 
@@ -45,7 +46,10 @@ class ServerConfig(BaseModel):
         self.log_dir = config.get("DIRECTORY", "logs_dir")
 
         # Server Options
-        self.access_key = config.get("SERVER", "access_key")
+        self.secret_key = config.get("SERVER", "secret_key")
+        self.algorithm = config.get("SERVER", "algorithm")
+        self.expiration_time = config.getint("SERVER", "expiration_time")
+        self.issuer = config.get("SERVER", "issuer")
 
         # Database Options
         self.database_server = config.get("DATABASE", "server")
@@ -56,8 +60,17 @@ class ServerConfig(BaseModel):
         if "LOGS_DIR" in os.environ:
             self.log_dir = os.environ["LOGS_DIR"]
 
-        if "ACCESS_KEY" in os.environ:
-            self.access_key = os.environ["ACCESS_KEY"]
+        if "ACCESS_TOKEN_SECRET_KEY" in os.environ:
+            self.secret_key = os.environ["SECRET_KEY"]
+
+        if "ACCESS_TOKEN_ALGORITHM" in os.environ:
+            self.algorithm = os.environ["ALGORITHM"]
+
+        if "ACCESS_TOKEN_EXPIRATION_TIME" in os.environ:
+            self.expiration_time = int(os.environ["ACCESS_TOKEN_EXPIRATION_TIME"])
+
+        if "ACCESS_TOKEN_ISSUER" in os.environ:
+            self.issuer = os.environ["ACCESS_TOKEN_ISSUER"]
 
         if "DATABASE_SERVER" in os.environ:
             self.database_server = os.environ["DATABASE_SERVER"]
