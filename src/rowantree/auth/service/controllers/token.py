@@ -8,8 +8,8 @@ from starlette.exceptions import HTTPException
 
 from rowantree.auth.sdk.contracts.dto.token import Token
 
-from ..auth.auth import AuthService
 from ..contracts.dto.user.user import User
+from ..services.auth import AuthService
 from .abstract_controller import AbstractController
 
 

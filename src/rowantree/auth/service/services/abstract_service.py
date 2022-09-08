@@ -2,7 +2,7 @@
 
 from pydantic import BaseModel
 
-from ..db.dao import DBDAO
+from .db.dao import DBDAO
 
 
 class AbstractService(BaseModel):

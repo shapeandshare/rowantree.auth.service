@@ -6,7 +6,7 @@ import socket
 from mysql.connector import Error, errorcode
 from mysql.connector.pooling import MySQLConnectionPool
 
-from ..common.environment import demand_env_var
+from ...common.environment import demand_env_var
 
 
 # pylint: disable=duplicate-code

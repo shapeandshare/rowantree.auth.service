@@ -10,7 +10,7 @@ from mysql.connector.pooling import MySQLConnectionPool
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from ..contracts.dto.user.user import User
+from ...contracts.dto.user.user import User
 from .incorrect_row_count_error import IncorrectRowCountError
 
 
