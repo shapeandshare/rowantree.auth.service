@@ -1,17 +1,37 @@
+""" Token Controller Definition """
+
 from typing import Optional
 
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from ..contracts.dto.token import Token
-from ..contracts.dto.user_in_db import UserInDB
+from rowantree.auth.sdk.contracts.dto.token import Token
+
+from ..auth.auth import AuthService
+from ..contracts.dto.user.user import User
 from .abstract_controller import AbstractController
 
 
 class TokenController(AbstractController):
+    """Token Controller"""
+
     def execute(self, request: OAuth2PasswordRequestForm) -> Token:
-        user: Optional[UserInDB] = self.auth_service.authenticate_user(request.username, request.password)
+        """
+        Execute the controller action. (Auth User)
+
+        Parameters
+        ----------
+        request: OAuth2PasswordRequestForm
+            The username/password form data
+
+        Returns
+        -------
+        token: Token
+            A token with the users permissions.
+        """
+
+        user: Optional[User] = self.auth_service.authenticate_user(request.username, request.password)
 
         if not user:
             raise HTTPException(
@@ -19,4 +39,4 @@ class TokenController(AbstractController):
                 detail="Incorrect username or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return self.auth_service.create_user_access_token(user=user)
+        return AuthService.create_user_access_token(user=user)

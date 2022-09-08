@@ -9,3 +9,6 @@ python-jose~=3.3
 # passlib[bcrypt]
 bcrypt~=4.0
 passlib~=1.7
+
+rowantree.auth.sdk~=0.1
+python-dotenv~=0.21

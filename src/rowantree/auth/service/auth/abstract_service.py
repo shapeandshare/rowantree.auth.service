@@ -2,7 +2,6 @@
 
 from pydantic import BaseModel
 
-from ..config.server import ServerConfig
 from ..db.dao import DBDAO
 
 
@@ -14,12 +13,13 @@ class AbstractService(BaseModel):
     ----------
     dao: DBDAO
         The database DAO.
-    config: ServerConfig
-        A server config object
     """
 
     dao: DBDAO
-    config: ServerConfig
 
     class Config:
+        """
+        Pydantic Default Configuration Over-Ride
+        """
+
         arbitrary_types_allowed = True

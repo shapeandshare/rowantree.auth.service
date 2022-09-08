@@ -6,6 +6,4 @@ pylint>=2.12.2
 isort>=5.10.1
 safety>=1.10.3
 
-python-dotenv>=0.19.2
-
 coverage>=6.3.2
