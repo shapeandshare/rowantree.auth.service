@@ -11,11 +11,11 @@ from starlette.middleware.cors import CORSMiddleware
 
 from rowantree.auth.sdk.contracts.dto.token import Token
 
-from ..auth.auth import AuthService
 from ..common.environment import demand_env_var
 from ..controllers.token import TokenController
-from ..db.dao import DBDAO
-from ..db.utils import get_connect_pool
+from ..services.auth import AuthService
+from ..services.db.dao import DBDAO
+from ..services.db.utils import get_connect_pool
 
 # Setup logging
 Path(demand_env_var(name="LOGS_DIR")).mkdir(parents=True, exist_ok=True)

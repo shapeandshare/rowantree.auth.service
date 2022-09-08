@@ -11,8 +11,8 @@ from rowantree.auth.sdk.contracts.dto.token import Token
 
 from ..common.environment import demand_env_var, demand_env_var_as_float
 from ..contracts.dto.user.user import User
-from ..db.incorrect_row_count_error import IncorrectRowCountError
 from .abstract_service import AbstractService
+from .db.incorrect_row_count_error import IncorrectRowCountError
 
 
 class AuthService(AbstractService):

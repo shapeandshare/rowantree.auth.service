@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
-from ..auth.auth import AuthService
+from ..services.auth import AuthService
 
 
 class AbstractController(ABC):
