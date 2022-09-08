@@ -1,6 +1,6 @@
 """ User Definition """
 
-from base import UserBase
+from .base import UserBase
 
 
 class User(UserBase):
