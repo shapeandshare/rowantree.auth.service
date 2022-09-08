@@ -79,6 +79,22 @@ class DBDAO:
         return rows
 
     def get_user(self, username: Optional[str] = None, guid: Optional[str] = None) -> User:
+        """
+        Get User (From Database) Using `username` first, else `guid`.  At least one must be supplied.
+
+        Parameters
+        ----------
+        username: Optional[str]
+            username
+        guid: Optional[str]
+            user guid
+
+        Returns
+        -------
+        user: User
+            User (from database)
+        """
+
         if username is None and guid is None:
             logging.debug("get_user called without username or a guid, one is required")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

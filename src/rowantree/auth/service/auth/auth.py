@@ -85,8 +85,7 @@ class AuthService(AbstractService):
         try:
             user = self.dao.get_user(username=username)
         except IncorrectRowCountError as error:
-            logging.debug(f"User not found: {str(error)}")
-
+            logging.debug("User not found: %s", str(error))
         if not user:
             return None
         if not self.verify_password(password, user.hashed_password):

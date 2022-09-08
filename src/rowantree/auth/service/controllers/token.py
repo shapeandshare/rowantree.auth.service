@@ -1,3 +1,5 @@
+""" Token Controller Definition """
+
 from typing import Optional
 
 from fastapi.security import OAuth2PasswordRequestForm
@@ -12,7 +14,23 @@ from .abstract_controller import AbstractController
 
 
 class TokenController(AbstractController):
+    """Token Controller"""
+
     def execute(self, request: OAuth2PasswordRequestForm) -> Token:
+        """
+        Execute the controller action. (Auth User)
+
+        Parameters
+        ----------
+        request: OAuth2PasswordRequestForm
+            The username/password form data
+
+        Returns
+        -------
+        token: Token
+            A token with the users permissions.
+        """
+
         user: Optional[User] = self.auth_service.authenticate_user(request.username, request.password)
 
         if not user:

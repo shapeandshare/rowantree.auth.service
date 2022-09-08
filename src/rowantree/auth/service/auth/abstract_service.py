@@ -18,4 +18,8 @@ class AbstractService(BaseModel):
     dao: DBDAO
 
     class Config:
+        """
+        Pydantic Default Configuration Over-Ride
+        """
+
         arbitrary_types_allowed = True
