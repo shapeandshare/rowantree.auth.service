@@ -8,8 +8,8 @@ from jose import jwt
 from passlib.context import CryptContext
 
 from rowantree.auth.sdk.contracts.dto.token import Token
+from rowantree.common.sdk import demand_env_var, demand_env_var_as_float
 
-from ..common.environment import demand_env_var, demand_env_var_as_float
 from ..contracts.dto.user.user import User
 from .abstract_service import AbstractService
 from .db.incorrect_row_count_error import IncorrectRowCountError
