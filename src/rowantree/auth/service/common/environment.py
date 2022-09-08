@@ -98,9 +98,8 @@ def demand_env_var_as_bool(name: str) -> bool:
     """
 
     value_str: str = demand_env_var(name=name).lower()
-    if value_str == "true" or value_str == "1":
+    if value_str in ("true", "1"):
         return True
-    elif value_str == "false" or value_str == "0":
+    if value_str in ("false", "0"):
         return False
-    else:
-        raise EnvironmentVariableNotFoundError(f"Environment variable ({name}) not boolean and can not be loaded")
+    raise EnvironmentVariableNotFoundError(f"Environment variable ({name}) not boolean and can not be loaded")
