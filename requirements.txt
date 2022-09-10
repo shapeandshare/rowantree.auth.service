@@ -4,5 +4,5 @@ mysql-connector-python~=8.0
 starlette~=0.19
 pydantic~=1.10
 python-multipart>=0.0.5
-rowantree.auth.sdk~=0.7
+rowantree.auth.sdk~=0.8
 rowantree.common.sdk~=0.1
