@@ -6,10 +6,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from rowantree.auth.sdk.contracts.dto.token import Token
+from rowantree.auth.sdk import Token, User
+from rowantree.auth.sdk.common.jwt import create_user_access_token
 
-from ..contracts.dto.user.user import User
-from ..services.auth import AuthService
 from .abstract_controller import AbstractController
 
 
@@ -39,4 +38,4 @@ class TokenController(AbstractController):
                 detail="Incorrect username or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return AuthService.create_user_access_token(user=user)
+        return create_user_access_token(user=user)

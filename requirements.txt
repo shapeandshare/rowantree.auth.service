@@ -4,11 +4,5 @@ mysql-connector-python~=8.0
 starlette~=0.19
 pydantic~=1.10
 python-multipart>=0.0.5
-python-jose~=3.3
-
-# passlib[bcrypt]
-bcrypt~=4.0
-passlib~=1.7
-
-rowantree.auth.sdk~=0.3
+rowantree.auth.sdk~=0.6
 rowantree.common.sdk~=0.1

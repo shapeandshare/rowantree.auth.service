@@ -10,7 +10,8 @@ from mysql.connector.pooling import MySQLConnectionPool
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from ...contracts.dto.user.user import User
+from rowantree.auth.sdk import User
+
 from .incorrect_row_count_error import IncorrectRowCountError
 
 
@@ -106,8 +107,8 @@ class DBDAO:
             args = [guid]
             proc_name: str = "getUserByGUID"
 
-        rows: list[Tuple] = self._call_proc(proc_name, args, True)
-        if len(rows) != 1:
+        rows: Optional[list[Tuple]] = self._call_proc(proc_name, args, True)
+        if rows is None or len(rows) != 1:
             raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
         user: tuple = rows[0]
 
@@ -122,3 +123,18 @@ class DBDAO:
         return User(
             username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=is_disabled, admin=is_admin
         )
+
+    def create_user(self, user: User) -> User:
+        # The inbound User will be missing a guid.
+        # This is auto assigned on the database side and returned by the call.
+
+        args: list[str] = [user.username, user.email, user.hashed_password, user.disabled, user.admin]
+        proc_name: str = "createUser"
+
+        rows: Optional[list[Tuple]] = self._call_proc(proc_name, args, True)
+        if rows is None or len(rows) != 1:
+            raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
+        user_guid: str = rows[0][0]
+
+        user.guid = user_guid
+        return user

@@ -4,14 +4,16 @@ import logging
 import os
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, status
+from fastapi import Depends, FastAPI, Form, status
 from fastapi.security import OAuth2PasswordRequestForm
 from mysql.connector.pooling import MySQLConnectionPool
 from starlette.middleware.cors import CORSMiddleware
 
+from rowantree.auth.sdk import RegisterUserRequest, User
 from rowantree.auth.sdk.contracts.dto.token import Token
 from rowantree.common.sdk import demand_env_var
 
+from ..controllers.register import RegisterController
 from ..controllers.token import TokenController
 from ..services.auth import AuthService
 from ..services.db.dao import DBDAO
@@ -37,6 +39,8 @@ auth_service: AuthService = AuthService(dao=dao)
 
 # Create controllers
 token_controller: TokenController = TokenController(auth_service=auth_service)
+register_controller: RegisterController = RegisterController(auth_service=auth_service)
+
 
 # Create the FastAPI application
 app = FastAPI()
@@ -92,3 +96,11 @@ def token_handler(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
     """
 
     return token_controller.execute(request=form_data)
+
+
+@app.post("/v1/auth/register", status_code=status.HTTP_200_OK)
+def register_handler(username: str = Form(), email: str = Form(), hashed_password: str = Form()) -> User:
+    form_data: RegisterUserRequest = RegisterUserRequest(
+        username=username, email=email, hashed_password=hashed_password
+    )
+    return register_controller.execute(request=form_data)
