@@ -65,6 +65,20 @@ class AuthService(AbstractService):
     #     return user
 
     def register_user(self, request: RegisterUserRequest) -> Optional[User]:
+        """
+        Creates a user record in the database.
+
+        Parameters
+        ----------
+        request: RegisterUserRequest
+            The user registration request.
+
+        Returns
+        -------
+        user: Optional[User]
+            A user if one could be created, `None` otherwise.
+        """
+
         user: User = User(
             username=request.username,
             hashed_password=request.hashed_password,

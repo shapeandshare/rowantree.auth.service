@@ -61,16 +61,25 @@ class DBDAO:
                 rows = result.fetchall()
             cursor.close()
         except socket.error as error:
-            logging.debug(error)
-            raise error
+            logging.error(error)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+            ) from error
         except mysql.connector.Error as error:
+            logging.error(str(error))
             if error.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                logging.debug("Something is wrong with your user name or password")
+                logging.error("Something is wrong with your user name or password")
             elif error.errno == errorcode.ER_BAD_DB_ERROR:
-                logging.debug("Database does not exist")
-            else:
-                logging.debug(error)
-            raise error
+                logging.error("Database does not exist")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+            ) from error
+        except Exception as error:
+            # All other uncaught exception types
+            logging.error(str(error))
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+            ) from error
         else:
             cnx.close()
 
@@ -125,6 +134,20 @@ class DBDAO:
         )
 
     def create_user(self, user: User) -> User:
+        """
+        Creates a new user within the database.
+
+        Parameters
+        ----------
+        user: User
+            User object to create.
+
+        Returns
+        -------
+        user: User
+            The requested `User` but with the guid assigned.
+        """
+
         # The inbound User will be missing a guid.
         # This is auto assigned on the database side and returned by the call.
 
