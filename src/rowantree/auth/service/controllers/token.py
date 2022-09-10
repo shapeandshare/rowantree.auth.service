@@ -6,8 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from rowantree.auth.sdk import Token, User
-from rowantree.auth.sdk.common.jwt import create_user_access_token
+from rowantree.auth.sdk import Token, User, create_user_access_token
 
 from .abstract_controller import AbstractController
 

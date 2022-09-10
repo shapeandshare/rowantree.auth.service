@@ -3,8 +3,7 @@
 import logging
 from typing import Optional
 
-from rowantree.auth.sdk import RegisterUserRequest, User
-from rowantree.auth.sdk.common.password import verify_password
+from rowantree.auth.sdk import RegisterUserRequest, User, verify_password
 
 from .abstract_service import AbstractService
 from .db.incorrect_row_count_error import IncorrectRowCountError

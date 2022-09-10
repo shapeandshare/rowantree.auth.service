@@ -9,8 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from mysql.connector.pooling import MySQLConnectionPool
 from starlette.middleware.cors import CORSMiddleware
 
-from rowantree.auth.sdk import RegisterUserRequest, User
-from rowantree.auth.sdk.contracts.dto.token import Token
+from rowantree.auth.sdk import RegisterUserRequest, Token, User
 from rowantree.common.sdk import demand_env_var
 
 from ..controllers.register import RegisterController
