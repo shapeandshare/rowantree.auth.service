@@ -10,7 +10,8 @@ from mysql.connector.pooling import MySQLConnectionPool
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from ...contracts.dto.user.user import User
+from rowantree.auth.sdk import User
+
 from .incorrect_row_count_error import IncorrectRowCountError
 
 
@@ -60,16 +61,25 @@ class DBDAO:
                 rows = result.fetchall()
             cursor.close()
         except socket.error as error:
-            logging.debug(error)
-            raise error
+            logging.error(error)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+            ) from error
         except mysql.connector.Error as error:
+            logging.error(str(error))
             if error.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                logging.debug("Something is wrong with your user name or password")
+                logging.error("Something is wrong with your user name or password")
             elif error.errno == errorcode.ER_BAD_DB_ERROR:
-                logging.debug("Database does not exist")
-            else:
-                logging.debug(error)
-            raise error
+                logging.error("Database does not exist")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+            ) from error
+        except Exception as error:
+            # All other uncaught exception types
+            logging.error(str(error))
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+            ) from error
         else:
             cnx.close()
 
@@ -106,8 +116,8 @@ class DBDAO:
             args = [guid]
             proc_name: str = "getUserByGUID"
 
-        rows: list[Tuple] = self._call_proc(proc_name, args, True)
-        if len(rows) != 1:
+        rows: Optional[list[Tuple]] = self._call_proc(proc_name, args, True)
+        if rows is None or len(rows) != 1:
             raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
         user: tuple = rows[0]
 
@@ -122,3 +132,32 @@ class DBDAO:
         return User(
             username=user[2], guid=user[1], email=user[3], hashed_password=user[4], disabled=is_disabled, admin=is_admin
         )
+
+    def create_user(self, user: User) -> User:
+        """
+        Creates a new user within the database.
+
+        Parameters
+        ----------
+        user: User
+            User object to create.
+
+        Returns
+        -------
+        user: User
+            The requested `User` but with the guid assigned.
+        """
+
+        # The inbound User will be missing a guid.
+        # This is auto assigned on the database side and returned by the call.
+
+        args: list[str] = [user.username, user.email, user.hashed_password, user.disabled, user.admin]
+        proc_name: str = "createUser"
+
+        rows: Optional[list[Tuple]] = self._call_proc(proc_name, args, True)
+        if rows is None or len(rows) != 1:
+            raise IncorrectRowCountError(f"Result count was not exactly one. Received: {rows}")
+        user_guid: str = rows[0][0]
+
+        user.guid = user_guid
+        return user

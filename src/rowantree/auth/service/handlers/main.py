@@ -4,18 +4,19 @@ import logging
 import os
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, status
+from fastapi import Depends, FastAPI, Form, status
 from fastapi.security import OAuth2PasswordRequestForm
-from mysql.connector.pooling import MySQLConnectionPool
+from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from rowantree.auth.sdk.contracts.dto.token import Token
+from rowantree.auth.sdk import RegisterUserRequest, Token, User
 from rowantree.common.sdk import demand_env_var
 
+from ..controllers.register import RegisterController
 from ..controllers.token import TokenController
 from ..services.auth import AuthService
 from ..services.db.dao import DBDAO
-from ..services.db.utils import get_connect_pool
+from ..services.db.utils import WrappedConnectionPool
 
 # Setup logging
 Path(demand_env_var(name="LOGS_DIR")).mkdir(parents=True, exist_ok=True)
@@ -30,13 +31,15 @@ logging.basicConfig(
 logging.debug("Starting server")
 
 # Creating database connection pool, and DAO
-cnxpool: MySQLConnectionPool = get_connect_pool()
-dao: DBDAO = DBDAO(cnxpool=cnxpool)
+wrapped_cnxpool: WrappedConnectionPool = WrappedConnectionPool()
+dao: DBDAO = DBDAO(cnxpool=wrapped_cnxpool.cnxpool)
 auth_service: AuthService = AuthService(dao=dao)
 
 
 # Create controllers
 token_controller: TokenController = TokenController(auth_service=auth_service)
+register_controller: RegisterController = RegisterController(auth_service=auth_service)
+
 
 # Create the FastAPI application
 app = FastAPI()
@@ -90,5 +93,51 @@ def token_handler(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
     [STATUS CODE] 401: Permission Denied
     [STATUS CODE] 500: Internal Server Error
     """
+    try:
+        return token_controller.execute(request=form_data)
+    except HTTPException as error:
+        logging.error(str(error))
+        raise error from error
+    except Exception as error:
+        # Caught all other uncaught errors.
+        logging.error(str(error))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+        ) from error
 
-    return token_controller.execute(request=form_data)
+
+@app.post("/v1/auth/register", status_code=status.HTTP_200_OK)
+def register_handler(username: str = Form(), email: str = Form(), hashed_password: str = Form()) -> User:
+    """
+    Register User
+    [POST] /v1/auth/register
+
+    Form Data
+    ---------
+    username: str
+    email: str
+    hashed_password: str
+
+    Returns
+    -------
+    user: User
+
+    [STATUS CODE] 200: OK
+    [STATUS CODE] 400: Invalid Request
+    [STATUS CODE] 500: Internal Server Error
+    """
+
+    try:
+        form_data: RegisterUserRequest = RegisterUserRequest(
+            username=username, email=email, hashed_password=hashed_password
+        )
+        return register_controller.execute(request=form_data)
+    except HTTPException as error:
+        logging.error(str(error))
+        raise error from error
+    except Exception as error:
+        # Caught all other uncaught errors.
+        logging.error(str(error))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+        ) from error
