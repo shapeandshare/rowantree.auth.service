@@ -3,7 +3,7 @@
 import logging
 from typing import Optional
 
-from rowantree.auth.sdk import RegisterUserRequest, User, verify_password
+from rowantree.auth.sdk import RegisterUserRequest, User, get_password_hash, verify_password
 
 from .abstract_service import AbstractService
 from .db.incorrect_row_count_error import IncorrectRowCountError
@@ -81,7 +81,7 @@ class AuthService(AbstractService):
 
         user: User = User(
             username=request.username,
-            hashed_password=request.hashed_password,
+            hashed_password=get_password_hash(request.password),
             email=request.email,
             disabled=False,
             admin=False,

@@ -107,7 +107,7 @@ def token_handler(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
 
 
 @app.post("/v1/auth/register", status_code=status.HTTP_200_OK)
-def register_handler(username: str = Form(), email: str = Form(), hashed_password: str = Form()) -> User:
+def register_handler(username: str = Form(), email: str = Form(), password: str = Form()) -> User:
     """
     Register User
     [POST] /v1/auth/register
@@ -128,9 +128,7 @@ def register_handler(username: str = Form(), email: str = Form(), hashed_passwor
     """
 
     try:
-        form_data: RegisterUserRequest = RegisterUserRequest(
-            username=username, email=email, hashed_password=hashed_password
-        )
+        form_data: RegisterUserRequest = RegisterUserRequest(username=username, email=email, password=password)
         return register_controller.execute(request=form_data)
     except HTTPException as error:
         logging.error(str(error))
