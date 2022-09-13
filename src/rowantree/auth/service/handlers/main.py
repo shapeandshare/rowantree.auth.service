@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from rowantree.auth.sdk import RegisterUserRequest, Token, User, UserBase
+from rowantree.auth.sdk import RegisterUserRequest, Token, UserBase
 from rowantree.common.sdk import demand_env_var
 
 from ..controllers.register import RegisterController
