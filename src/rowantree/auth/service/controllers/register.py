@@ -4,7 +4,7 @@ from typing import Optional
 from starlette import status
 from starlette.exceptions import HTTPException
 
-from rowantree.auth.sdk import RegisterUserRequest, User
+from rowantree.auth.sdk import RegisterUserRequest, User, UserBase
 
 from .abstract_controller import AbstractController
 
@@ -12,7 +12,7 @@ from .abstract_controller import AbstractController
 class RegisterController(AbstractController):
     """Register Controller"""
 
-    def execute(self, request: RegisterUserRequest) -> User:
+    def execute(self, request: RegisterUserRequest) -> UserBase:
         """
         Create new user.
 
@@ -26,4 +26,5 @@ class RegisterController(AbstractController):
 
         if not user:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Unable to create user")
-        return user
+
+        return UserBase.parse_obj(user)

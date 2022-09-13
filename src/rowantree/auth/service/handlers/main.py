@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
-from rowantree.auth.sdk import RegisterUserRequest, Token, User
+from rowantree.auth.sdk import RegisterUserRequest, Token, User, UserBase
 from rowantree.common.sdk import demand_env_var
 
 from ..controllers.register import RegisterController
@@ -107,7 +107,7 @@ def token_handler(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
 
 
 @app.post("/v1/auth/register", status_code=status.HTTP_200_OK)
-def register_handler(username: str = Form(), email: str = Form(), hashed_password: str = Form()) -> User:
+def register_handler(username: str = Form(), email: str = Form(), password: str = Form()) -> UserBase:
     """
     Register User
     [POST] /v1/auth/register
@@ -116,11 +116,11 @@ def register_handler(username: str = Form(), email: str = Form(), hashed_passwor
     ---------
     username: str
     email: str
-    hashed_password: str
+    password: str
 
     Returns
     -------
-    user: User
+    user: UserBase
 
     [STATUS CODE] 200: OK
     [STATUS CODE] 400: Invalid Request
@@ -128,9 +128,7 @@ def register_handler(username: str = Form(), email: str = Form(), hashed_passwor
     """
 
     try:
-        form_data: RegisterUserRequest = RegisterUserRequest(
-            username=username, email=email, hashed_password=hashed_password
-        )
+        form_data: RegisterUserRequest = RegisterUserRequest(username=username, email=email, password=password)
         return register_controller.execute(request=form_data)
     except HTTPException as error:
         logging.error(str(error))
