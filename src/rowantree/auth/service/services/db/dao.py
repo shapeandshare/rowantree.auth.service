@@ -6,7 +6,7 @@ from typing import Optional, Tuple
 
 import mysql.connector
 from mysql.connector import errorcode
-from mysql.connector.pooling import MySQLConnectionPool
+from mysql.connector.pooling import MySQLConnectionPool, PooledMySQLConnection
 from starlette import status
 from starlette.exceptions import HTTPException
 
@@ -53,6 +53,7 @@ class DBDAO:
         if debug:
             logging.debug("[DAO] [Stored Proc Call Details] Name: {%s}, Arguments: {%s}", name, args)
         rows: Optional[list[Tuple]] = None
+        cnx: Optional[PooledMySQLConnection] = None
         try:
             cnx = self.cnxpool.get_connection()
             cursor = cnx.cursor()
@@ -60,28 +61,39 @@ class DBDAO:
             for result in cursor.stored_results():
                 rows = result.fetchall()
             cursor.close()
+            cnx.close()
         except socket.error as error:
+            logging.error("socket.error")
             logging.error(error)
+            if cnx:
+                cnx.close()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
             ) from error
         except mysql.connector.Error as error:
+            logging.error("mysql.connector.Error: {%i}", error.errno)
             logging.error(str(error))
+            if cnx:
+                cnx.close()
             if error.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 logging.error("Something is wrong with your user name or password")
             elif error.errno == errorcode.ER_BAD_DB_ERROR:
                 logging.error("Database does not exist")
+            elif error.errno == errorcode.ER_DUP_ENTRY:
+                logging.error("Duplicate key")
+                raise DuplicateKeyError(str(error)) from error
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
             ) from error
         except Exception as error:
+            logging.error("error")
             # All other uncaught exception types
             logging.error(str(error))
+            if cnx:
+                cnx.close()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
             ) from error
-        else:
-            cnx.close()
 
         if debug:
             logging.debug("[DAO] [Stored Proc Call Details] Returning:")
