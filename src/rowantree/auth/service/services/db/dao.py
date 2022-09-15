@@ -11,11 +11,13 @@ from starlette import status
 from starlette.exceptions import HTTPException
 
 from rowantree.auth.sdk import User
+from rowantree.contracts import BaseModel
 
+from ...contracts.duplicate_key_error import DuplicateKeyError
 from .incorrect_row_count_error import IncorrectRowCountError
 
 
-class DBDAO:
+class DBDAO(BaseModel):
     """
     Database DAO
 
@@ -26,9 +28,6 @@ class DBDAO:
     """
 
     cnxpool: MySQLConnectionPool
-
-    def __init__(self, cnxpool: MySQLConnectionPool):
-        self.cnxpool = cnxpool
 
     # pylint: disable=duplicate-code
     def _call_proc(self, name: str, args: list, debug: bool = False) -> Optional[list[Tuple]]:
