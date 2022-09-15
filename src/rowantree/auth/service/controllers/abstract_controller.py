@@ -1,12 +1,14 @@
 """ Abstract Controller Definition """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Any, Optional
+
+from rowantree.contracts import BaseModel
 
 from ..services.auth import AuthService
 
 
-class AbstractController(ABC):
+class AbstractController(BaseModel):
     """
     Abstract Controller
 
@@ -17,9 +19,6 @@ class AbstractController(ABC):
     """
 
     auth_service: AuthService
-
-    def __init__(self, auth_service: AuthService):
-        self.auth_service = auth_service
 
     @abstractmethod
     def execute(self, *args, **kwargs) -> Optional[Any]:

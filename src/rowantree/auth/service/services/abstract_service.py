@@ -1,6 +1,6 @@
 """ Abstract Controller Definition """
 
-from pydantic import BaseModel
+from rowantree.contracts import BaseModel
 
 from .db.dao import DBDAO
 
@@ -16,10 +16,3 @@ class AbstractService(BaseModel):
     """
 
     dao: DBDAO
-
-    class Config:
-        """
-        Pydantic Default Configuration Over-Ride
-        """
-
-        arbitrary_types_allowed = True
